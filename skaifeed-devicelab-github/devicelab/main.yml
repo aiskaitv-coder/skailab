@@ -1,0 +1,65 @@
+name: Device Lab (Safari/Chrome/PWA)
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "URL προς έλεγχο (κενό = production)"
+        required: false
+        default: "https://v62agskai.netlify.app"
+  schedule:
+    - cron: "0 5 * * *"   # +καθημερινό run 08:00 Αθήνας (σβήσε τις 2 γραμμές αν δεν το θες)
+
+jobs:
+  devicelab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: devicelab
+        run: npm install
+
+      - name: Install browsers (WebKit + Chromium)
+        working-directory: devicelab
+        run: npx playwright install --with-deps webkit chromium
+
+      - name: Run device lab
+        working-directory: devicelab
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://v62agskai.netlify.app' }}
+        run: npx playwright test
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: devicelab/screenshots/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: devicelab/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload traces/videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: devicelab/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
