@@ -1,0 +1,17 @@
+{
+  "name": "skaifeed-devicelab",
+  "version": "1.0.0",
+  "description": "ΣΚΑΪ Feed — device lab (GitHub Actions): WebKit/Safari, Chrome, PWA smoke tests",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:ios": "playwright test --project=iphone-safari --project=iphone-pwa",
+    "test:android": "playwright test --project=android-chrome --project=android-pwa",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report",
+    "shots": "playwright test tests/screenshots.spec.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.45.0"
+  }
+}
